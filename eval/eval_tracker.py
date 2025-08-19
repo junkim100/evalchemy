@@ -1,5 +1,6 @@
 import getpass
 import json
+import logging
 import re
 import subprocess
 import time
@@ -18,7 +19,8 @@ from lm_eval.utils import setup_logging, handle_non_serializable, hash_string, s
 from database.models import Dataset, EvalResult, EvalSetting, Model
 from database.utils import create_db_engine, create_tables, get_model_from_db, get_or_add_model_by_name, sessionmaker
 
-eval_logger = setup_logging("INFO")
+setup_logging("INFO")
+eval_logger = logging.getLogger(__name__)
 
 
 def flatten_dict(d: Dict[str, Any], parent_key: str = "", sep: str = "/") -> Dict[str, Any]:
