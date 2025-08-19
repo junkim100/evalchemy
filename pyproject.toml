@@ -33,19 +33,19 @@ dependencies = [
     "sentencepiece",
     "sentence-transformers>=2.2.2",
     "optimum==1.12.0",
-    
+
     # Machine Learning and Scientific Computing
     "numpy",
     "pandas",
     "scipy",
     "scikit-learn",
     "faiss-cpu==1.7.4",
-    
+
     # ML Experiment Tracking & Visualization
     "wandb",
     "tensorboard",
     "evaluate",
-    
+
     # NLP & Text Processing
     "nltk",
     "fasttext-wheel",
@@ -54,7 +54,7 @@ dependencies = [
     "langdetect",
     "fuzzywuzzy",
     "python-Levenshtein",
-    
+
     # Data Processing & Parsing
     "datasets",
     "protobuf",
@@ -64,7 +64,7 @@ dependencies = [
     "jsonpickle",
     "hjson",
     "msgpack",
-    
+
     # AI Service Providers
     "openai",
     "anthropic",
@@ -75,7 +75,7 @@ dependencies = [
     "together",
     "dashscope",
     "fschat @ file:eval/chat_benchmarks/MTBench",  # Use relative path that pip will resolve during installation
-    
+
     # Cloud & Storage
     "gcsfs",
     "google-cloud-aiplatform",
@@ -86,7 +86,7 @@ dependencies = [
     "fsspec==2024.6.1",
     "hf-transfer",
     "huggingface_hub[cli]",
-    
+
     # Code Analysis & Development
     "black",
     "tree-sitter-python",
@@ -95,7 +95,7 @@ dependencies = [
     "asttokens",
     "mypy_extensions",
     "pyext @ git+https://github.com/penfever/PyExt",
-    
+
     # Web & API
     "fastapi>=0.101.0",
     "uvicorn>=0.23.0",
@@ -106,13 +106,13 @@ dependencies = [
     "websocket",
     "aiofiles",
     "bespokelabs-curator>=0.1.16.0",
-    
+
     # Database
     "sqlalchemy",
     "psycopg[binary]",
     "psycopg2-binary",
     "sqlitedict",
-    
+
     # Utilities
     "tqdm",
     "pqdm",
@@ -154,7 +154,7 @@ dependencies = [
     "swebench>=3.0.4",
 
     # LM Eval
-    "lm-eval[vllm] @ git+https://github.com/EtashGuha/lm-evaluation-harness@etashg/tokenize_fix",
+    "lm-eval[vllm] @ git+https://github.com/junkim100/lm-evaluation-harness",
 ]
 
 [project.urls]
