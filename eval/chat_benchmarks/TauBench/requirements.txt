@@ -1,0 +1,22 @@
+# Core dependencies for TauBench evaluation
+# tau-bench is installed automatically via evalchemy's pyproject.toml
+# It's installed from: git+https://github.com/sierra-research/tau-bench
+
+# Note: tau-bench has its own dependencies which will be installed automatically:
+# - litellm (for model API access)
+# - openai (for OpenAI models)
+# - anthropic (for Anthropic models)
+# - google-generativeai (for Google models)
+# - mistralai (for Mistral models)
+# - pydantic (for data validation)
+# - tenacity (for retries)
+# - tqdm (for progress bars)
+
+# If you need to install tau-bench separately (e.g., for development):
+# pip install git+https://github.com/sierra-research/tau-bench
+
+# Or clone and install in editable mode:
+# git clone https://github.com/sierra-research/tau-bench
+# cd tau-bench
+# pip install -e .
+
