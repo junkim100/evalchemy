@@ -136,6 +136,23 @@ class WMT24Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
             "uk": "Ukrainian", "ur": "Urdu", "vi": "Vietnamese", "zh": "Mandarin", "zu": "Zulu"
         }
 
+        self.region = {
+            "ar_EG": "Egypt", "ar_SA": "Saudi Arabia", "bg_BG": "Bulgaria", "bn_IN": "India",
+            "ca_ES": "Spain", "cs_CZ": "Czech Republic", "da_DK": "Denmark", "de_DE": "Germany",
+            "el_GR": "Greece", "es_MX": "Mexico", "et_EE": "Estonia", "fa_IR": "Iran",
+            "fi_FI": "Finland", "fil_PH": "Philippines", "fr_CA": "Canada", "fr_FR": "France",
+            "gu_IN": "India", "he_IL": "Israel", "hi_IN": "India", "hr_HR": "Croatia",
+            "hu_HU": "Hungary", "id_ID": "Indonesia", "is_IS": "Iceland", "it_IT": "Italy",
+            "ja_JP": "Japan", "kn_IN": "India", "ko_KR": "South Korea", "lt_LT": "Lithuania",
+            "lv_LV": "Latvia", "ml_IN": "India", "mr_IN": "India", "nl_NL": "Netherlands",
+            "no_NO": "Norway", "pa_IN": "India", "pl_PL": "Poland", "pt_BR": "Brazil",
+            "pt_PT": "Portugal", "ro_RO": "Romania", "ru_RU": "Russia", "sk_SK": "Slovakia",
+            "sl_SI": "Slovenia", "sr_RS": "Serbia", "sv_SE": "Sweden", "sw_KE": "Kenya",
+            "sw_TZ": "Tanzania", "ta_IN": "India", "te_IN": "India", "th_TH": "Thailand",
+            "tr_TR": "Turkey", "uk_UA": "Ukraine", "ur_PK": "Pakistan", "vi_VN": "Vietnam",
+            "zh_CN": "China", "zh_TW": "Taiwan", "zu_ZA": "South Africa"
+        }
+        
         # Load dataset
         try:
             self.dataset = load_dataset("google/wmt24pp", language_pair)
@@ -146,11 +163,20 @@ class WMT24Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
         """Create a translation prompt for the given source text."""
         source_lang_name = self.lang_names.get(self.source_lang, self.source_lang)
         target_lang_name = self.lang_names.get(self.target_lang, self.target_lang)
+        target_region = self.region.get(self.target_lang_code, self.target_lang_code)
 
-        prompt = f"Translate the following {source_lang_name} text to {target_lang_name}:\n\n"
-        prompt += f"{source_text}\n\n"
-        prompt += f"Translation:"
+        # prompt = f"Translate the following {source_lang_name} text to {target_lang_name}:\n\n"
+        # prompt += f"{source_text}\n\n"
+        # prompt += f"Translation:"
 
+        prompt = f'''
+        You are a professional {source_lang_name} to {target_lang_name} translator, tasked with providing translations suitable for use in
+        {target_region} ({self.target_lang_code}). Your goal is to accurately convey the meaning and nuances of the original {source_lang_name}
+        text while adhering to {target_lang_name} grammar, vocabulary, and cultural sensitivities.
+        Please translate the following {source_lang_name} text into {target_lang_name} ({self.target_lang_code}):
+        {source_text}
+        Produce only the {target_lang_name} translation, without any additional explanations or commentary.
+        '''
         return prompt
 
     def _filter_examples(self, examples: List[Dict]) -> List[Dict]:
@@ -190,7 +216,6 @@ class WMT24Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
 
         # Apply filtering
         examples = self._filter_examples(examples)
-
         if self.debug:
             examples = examples[:10]
         elif self.max_examples:
@@ -302,6 +327,7 @@ class WMT24Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
             r"Translation:\s*(.*?)(?:\n|$)",
             r"Answer:\s*(.*?)(?:\n|$)",
             r"Output:\s*(.*?)(?:\n|$)",
+            r"</think>\s*([^<]*)"
         ]
 
         for pattern in patterns:

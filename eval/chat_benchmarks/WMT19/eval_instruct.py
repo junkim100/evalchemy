@@ -42,7 +42,7 @@ class WMT19Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
 
     def __init__(
         self,
-        language_pair: str = "de-en",
+        language_pair: str = "en-zh",
         max_examples: Optional[int] = None,
         debug: bool = False,
         seed: List[int] = [0, 1234, 1234, 1234],
@@ -109,15 +109,37 @@ class WMT19Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
             "lt": "Lithuanian", "ru": "Russian", "zh": "Chinese"
         }
 
+        self.region = {
+            "cs": "Czech Republic",
+            "de": "Germany",
+            "en": "United States",
+            "fi": "Finland",
+            "fr": "France",
+            "gu": "India",
+            "kk": "Kazakhstan",
+            "lt": "Lithuania",
+            "ru": "Russia",
+            "zh": "China"
+        }
+        
     def _create_translation_prompt(self, source_text: str) -> str:
         """Create a translation prompt for the given source text."""
         source_lang_name = self.lang_names[self.source_lang]
         target_lang_name = self.lang_names[self.target_lang]
-
-        prompt = f"Translate the following {source_lang_name} text to {target_lang_name}:\n\n"
-        prompt += f"{source_text}\n\n"
-        prompt += f"Translation:"
-
+        target_region = self.region.get(self.target_lang, self.target_lang)
+        
+        # prompt = f"Translate the following {source_lang_name} text to {target_lang_name}:\n\n"
+        # prompt += f"{source_text}\n\n"
+        # prompt += f"Translation:"
+        
+        prompt = f'''
+        You are a professional {source_lang_name} to {target_lang_name} translator, tasked with providing translations suitable for use in
+        {target_region} ({self.target_lang}). Your goal is to accurately convey the meaning and nuances of the original {source_lang_name}
+        text while adhering to {target_lang_name} grammar, vocabulary, and cultural sensitivities.
+        Please translate the following {source_lang_name} text into {target_lang_name} ({self.target_lang}):
+        {source_text}
+        Produce only the {target_lang_name} translation, without any additional explanations or commentary.
+        '''
         return prompt
 
     def generate_responses(self, model) -> Dict[str, Any]:
@@ -234,6 +256,7 @@ class WMT19Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
             r"Translation:\s*(.*?)(?:\n|$)",
             r"Answer:\s*(.*?)(?:\n|$)",
             r"Output:\s*(.*?)(?:\n|$)",
+            r"</think>\s*([^<]*)"
         ]
 
         for pattern in patterns:
