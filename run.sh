@@ -10,9 +10,9 @@ SCRIPT_NAME="$(basename "$0")"
 print_presets() {
   cat <<'EOF'
 Available run_name presets:
-  minimal : AIME24, BigCodeBench, MATH500, WMT24, LogicKor, GPQADiamond, zeroeval, AutoLogi, LongBenchv2, global_mmlu_ko, hrm8k, cmmlu, TauBench, HarmBench
-  full     : All minimal tasks plus: ArenaHard, WritingBench, longbench, LongBenchv2, babilong, zebralogic, LiveCodeBenchv5, japanese_leaderboard, HLE, WMT19, mmlu_redux, gpqa_diamond_zeroshot, IFEval, AIME25, gsm8k_symbolic, ruler, m_ifeval_ja, mgsm_direct_en/ja/zh, mmlu_prox_ko, include_base_44_korean, kobalt, csatqa, click, kmmlu, ceval-valid, agieval_cn
-  full_minus_minimal : Tasks in 'full' excluding those in 'minimal'
+  full     : agieval_cn AIME24 AIME25 ArenaHard AutoLogi babilong BigCodeBench ceval-valid click cmmlu CreativeWriting csatqa GPQADiamond gpqa_diamond_zeroshot global_mmlu_ko gsm8k_symbolic HarmBench HLE hrm8k IFEval include_base_44_korean japanese_leaderboard kmmlu kobalt LiveCodeBenchv5 LogicKor longbench LongBenchv2 m_ifeval_ja MATH500 mgsm_direct_ja mgsm_direct_zh mmlu_prox_ko mmlu_redux ruler TauBench WMT19 WMT24 WritingBench zebralogic zeroeval
+  minimal : AIME25 Babilong BigCodeBench cmmlu GPQADiamond HarmBench HLE hrm8k LiveCodeBenchv5 LogicKor MATH500 mgsm_direct_ja mmlu_prox_ko WMT24 zebralogic
+  full_minus_minimal : Tasks in 'full' excluding those in 'minimal' - agieval_cn AIME24 ArenaHard AutoLogi babilong ceval-valid click CreativeWriting csatqa gpqa_diamond_zeroshot global_mmlu_ko gsm8k_symbolic IFEval include_base_44_korean japanese_leaderboard kmmlu kobalt longbench LongBenchv2 m_ifeval_ja mgsm_direct_zh mmlu_redux ruler TauBench WMT19 WritingBench zeroeval
 
 EOF
 }
@@ -59,7 +59,7 @@ fi
 # =============================================================================
 # CLI FLAGS
 #   --model_path <path>                    (required: path to model dir)
-#   --run_name <minimal|full|full_minus_minimal|broken1>       (required: controls which TASKS to run)
+#   --run_name <full|minimal|full_minus_minimal|broken1>       (required: controls which TASKS to run)
 #   --debug                                (optional: enables debug mode)
 #   --debug_limit <N>                      (optional: #samples in debug; default 64)
 # =============================================================================
@@ -108,18 +108,18 @@ done
 # BASE CONFIG
 # =============================================================================
 
-BASE_MODEL_ARGS="pretrained=${MODEL_PATH},tokenizer=${MODEL_PATH},tensor_parallel_size=8,dtype=bfloat16,gpu_memory_utilization=0.5,max_model_len=32768,trust_remote_code=True,disable_log_stats=True"
+BASE_MODEL_ARGS="pretrained=${MODEL_PATH},tokenizer=${MODEL_PATH},tensor_parallel_size=8,dtype=bfloat16,gpu_memory_utilization=0.7,max_model_len=32768,trust_remote_code=True,disable_log_stats=True,max_num_seqs=1"
 
 # =============================================================================
 # TASK PRESETS BY RUN_NAME (Option A: fail fast on unknown)
 # =============================================================================
 declare -a TASKS
 case "$RUN_NAME" in
-  minimal) TASKS=("BigCodeBench" "MATH500" "GPQADiamond" "WMT24" "LogicKor" "zebralogic" "LongBenchv2" "global_mmlu_ko" "hrm8k" "cmmlu" "TauBench" "HarmBench") ;;
-  full)    TASKS=("AIME24" "AIME25" "BigCodeBench" "MATH500" "GPQADiamond" "WMT19" "WMT24" "LogicKor" "zeroeval" "AutoLogi" "LongBenchv2" "global_mmlu_ko" "hrm8k" "cmmlu" "TauBench" "HarmBench" "ArenaHard" "WritingBench" "longbench" "babilong" "zebralogic" "LiveCodeBenchv5" "japanese_leaderboard" "HLE" "mmlu_redux" "gpqa_diamond_zeroshot" "IFEval" "gsm8k_symbolic" "ruler" "m_ifeval_ja" "mgsm_direct_en" "mgsm_direct_ja" "mgsm_direct_zh" "mmlu_prox_ko" "include_base_44_korean" "kobalt" "csatqa" "click" "kmmlu" "ceval-valid" "agieval_cn") ;;
-  full_minus_minimal) TASKS=("AIME24" "AIME25" "WMT19" "zeroeval" "ArenaHard" "WritingBench" "longbench" "babilong" "zebralogic" "LiveCodeBenchv5" "japanese_leaderboard" "HLE" "mmlu_redux" "gpqa_diamond_zeroshot" "IFEval" "gsm8k_symbolic" "ruler" "m_ifeval_ja" "mgsm_direct_en" "mgsm_direct_ja" "mgsm_direct_zh" "mmlu_prox_ko" "include_base_44_korean" "kobalt" "csatqa" "click" "kmmlu" "ceval-valid" "agieval_cn") ;;
+  full) TASKS=("agieval_cn" "AIME24" "AIME25" "ArenaHard" "AutoLogi" "babilong" "BigCodeBench" "ceval-valid" "click" "cmmlu" "CreativeWriting" "csatqa" "GPQADiamond" "gpqa_diamond_zeroshot" "global_mmlu_ko" "gsm8k_symbolic" "HarmBench" "HLE" "hrm8k" "IFEval" "include_base_44_korean" "japanese_leaderboard" "kmmlu" "kobalt" "LiveCodeBenchv5" "LogicKor" "longbench" "LongBenchv2" "m_ifeval_ja" "MATH500" "mgsm_direct_ja" "mgsm_direct_zh" "mmlu_prox_ko" "mmlu_redux" "ruler" "TauBench" "WMT19" "WMT24" "WritingBench" "zebralogic" "zeroeval") ;;
+  minimal) TASKS=("WMT24" "babilong" "HarmBench" "HLE" "BigCodeBench" "LiveCodeBenchv5" "AIME25" "MATH500" "GPQADiamond" "LogicKor" "zebralogic" "mmlu_prox_ko" "hrm8k" "cmmlu" "mgsm_direct_ja") ;;
+  full_minus_minimal) TASKS=("agieval_cn" "AIME24" "ArenaHard" "AutoLogi" "babilong" "ceval-valid" "click" "csatqa" "gpqa_diamond_zeroshot" "global_mmlu_ko" "gsm8k_symbolic" "IFEval" "include_base_44_korean" "japanese_leaderboard" "kmmlu" "kobalt" "longbench" "LongBenchv2" "m_ifeval_ja" "mgsm_direct_zh" "mmlu_redux" "ruler" "TauBench" "WMT19" "WritingBench" "zeroeval") ;;
   *)
-    die "unknown --run_name '$RUN_NAME'. Valid options: minimal, full, full_minus_minimal, broken1"
+    die "unknown --run_name '$RUN_NAME'. Valid options: full, minimal, full_minus_minimal"
     ;;
 esac
 
@@ -202,11 +202,10 @@ date +"%s" > "$START_MARKER_FILE"
 
 cd /app
 set +e  # allow pipeline to capture exit code
-python -m eval.eval \
+echo "y" | python -m eval.eval \
   --model vllm \
   --tasks "${TASKS_STRING}" \
   --model_args "${MODEL_ARGS}" \
-  --batch_size 1 \
   --output_path "${OUTPUT_DIR}" \
   --apply_chat_template \
   --verbosity INFO \
