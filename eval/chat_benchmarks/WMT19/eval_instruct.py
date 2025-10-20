@@ -42,7 +42,7 @@ class WMT19Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
 
     def __init__(
         self,
-        language_pair: str = "en-zh",
+        language_pair: str = "zh-en",
         max_examples: Optional[int] = None,
         debug: bool = False,
         seed: List[int] = [0, 1234, 1234, 1234],
@@ -93,7 +93,7 @@ class WMT19Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
         # Available language pairs in WMT19
         self.available_pairs = [
             "cs-en", "de-en", "fi-en", "fr-de", "gu-en",
-            "kk-en", "lt-en", "ru-en", "zh-en"
+            "kk-en", "lt-en", "ru-en", "zh-en", "en-zh"
         ]
 
         if language_pair not in self.available_pairs:
