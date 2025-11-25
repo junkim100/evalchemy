@@ -863,7 +863,7 @@ def calculate_readability_metrics(text: str, data_dir: Optional[Path] = None) ->
 
 
 
-class CreativeWriting(BaseBenchmark):
+class CreativeWritingBenchmark(BaseBenchmark):
     """
     Creative Writing Bench benchmark implementation for evalchemy.
 
