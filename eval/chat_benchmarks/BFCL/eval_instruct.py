@@ -1,14 +1,8 @@
-from typing import Dict, List, Any, Optional
 import logging
-from sympy import subsets
 import torch
 import datasets
+from typing import Dict, List, Any, Optional
 from tqdm import tqdm
-import json
-import pandas as pd
-import os
-import yaml
-import shutil
 from eval.task import BaseBenchmark
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
@@ -27,17 +21,9 @@ class BFCLBenchmark(BaseBenchmark):
         self,
         dataset_name: str = "BFCL_v4_multiple",
         data_dir: str = "eval/chat_benchmarks/BFCL/bfcl_eval/data",
-        # config_dir: str = "eval/chat_benchmarks/ArenaHard/config",
-        test_category: List[str] = ['agentic'],       # THIS SHOULD BE SET TO ["all"] !!
-        # split: str = "test",
-        # version: str = "3.0",
-        # judge_model: str = "gpt-4.1",
-        # baseline_model_name: str = "o3-mini-2025-01-31",
-        # eval_model_name: str = "llama-3.1",
-        # reference_model_name: str = None,
-        # split: str = "test",
-        max_tokens: Optional[int] = 1024,
-        temperature: float = 0.6,
+        test_category: List[str] = ['all'],  
+        max_tokens: Optional[int] = 2048,
+        temperature: float = 0.001,
         do_sample: bool = True,
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
@@ -68,23 +54,7 @@ class BFCLBenchmark(BaseBenchmark):
         self.do_sample = do_sample
         self.debug = debug
 
-    
-    # def get_involved_test_entries(self, test_category_args, run_ids):
-    #     test_categories, all_test_entries_involved = [], []
-    #     if run_ids:
-    #         test_categories, all_test_entries_involved = load_test_entries_from_id_file(
-    #             TEST_IDS_TO_GENERATE_PATH
-    #         )
 
-    #     else:
-    #         test_categories = parse_test_category_argument(test_category_args)
-    #         for test_category in test_categories:
-    #             all_test_entries_involved.extend(load_dataset_entry(test_category))
-
-    #     return (
-    #         test_categories,
-    #         all_test_entries_involved,
-    #     )
 
     def get_involved_test_entries(self, test_category_args, run_ids):
         test_categories, all_test_entries_involved = [], {}
@@ -111,12 +81,6 @@ class BFCLBenchmark(BaseBenchmark):
                 test_categories,
                 all_test_entries_involved,
             ) = self.get_involved_test_entries(self.test_category, False)
-            # test_cases_total = self.collect_test_cases(
-            #     args,
-            #     model_name,
-            #     test_categories,
-            #     all_test_entries_involved,
-            # )
             if self.debug:
                 all_test_entries_involved = {k: v[:2] for k, v in all_test_entries_involved.items()}
                 self.logger.info(f"Debug mode: using 2 examples")
@@ -136,11 +100,9 @@ class BFCLBenchmark(BaseBenchmark):
             Dictionary containing model outputs and identifier
         """
         def _parse_query_response_prompting(model_response: Any) -> dict:
-            reasoning_content = ""
             cleaned_response = model_response
             if "</think>" in model_response:
                 parts = model_response.split("</think>")
-                reasoning_content = parts[0].rstrip("\n").split("<think>")[-1].lstrip("\n")
                 cleaned_response = parts[-1].lstrip("\n")
 
             return cleaned_response
@@ -212,17 +174,6 @@ class BFCLBenchmark(BaseBenchmark):
                         user_prompt = question[0]
                         messages.append(user_prompt)
 
-                    # function = example["function"]
-                    # messages.append(
-                    #     {
-                    #         "role": "assistant",
-                    #         "tool_calls": [{
-                    #             "type": "tool_call",
-                    #             "function": function   
-                    #         }]
-                    #     }
-                    # )
-
                     inputs = model.apply_chat_template(messages)
                     all_instances[test_category].append(
                         Instance(
@@ -257,11 +208,6 @@ class BFCLBenchmark(BaseBenchmark):
     def evaluate_responses(
             self,
             results: Dict[str, Any]) -> Dict[str, float]: 
-            # handler,
-            # prompt: str,
-            # model_name: str,
-            # test_category: List[str], 
-            # model_result: Dict[str, Any]) -> Dict[str, float]:
         """
         Evaluate the generated responses using ArenaHard evaluation metrics.
 
@@ -279,7 +225,6 @@ class BFCLBenchmark(BaseBenchmark):
         total_metrics = {}
         total_acc, total_cnt = 0, 0
         for test_category in test_categories:
-            # all_answer = all_answers[test_category]
             prompt = all_eval_set[test_category]
             model_result = all_answers[test_category]
             model_result = [{"id": p["id"], "result": answer} for p, answer in zip(prompt, model_result)]
@@ -380,11 +325,6 @@ class BFCLBenchmark(BaseBenchmark):
                 return None
 
             evaluation_results = self.evaluate_responses(generation_results)
-            
-            # for test_categoy, results, eval_set in zip(test_categories, all_results, all_eval_set):
-            #     evaluation_result = self.evaluate_responses(
-            #         handler = handler, prompt = eval_set, model_name = model_name, test_category = test_categoy, model_result = results)
-            #     evaluation_results[test_categoy]=evaluation_result
 
             return evaluation_results
 
