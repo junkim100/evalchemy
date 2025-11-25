@@ -30,9 +30,12 @@ MODEL_BASENAME="${MODEL_NAME##*/}"
 OUTPUT_DATASET="mlfoundations-dev/${MODEL_BASENAME}${SUFFIX}"
 
 # 2. TASK SET
-STANDARD_EVAL_TASKS=(AIME24,AMC23,MATH500,MMLUPro,JEEBench,GPQADiamond,LiveCodeBench,CodeElo,CodeForces)
-FULL_EVAL_TASKS=(AIME24,AMC23,MATH500,MMLUPro,JEEBench,GPQADiamond,LiveCodeBench,CodeElo,CodeForces,AIME25,HLE,LiveCodeBenchv5)
-AIME24=(AIME24)
+# STANDARD_EVAL_TASKS=(AIME24,AMC23,MATH500,MMLUPro,JEEBench,GPQADiamond,LiveCodeBench,CodeElo,CodeForces)
+# FULL_EVAL_TASKS=(AIME24,AMC23,MATH500,MMLUPro,JEEBench,GPQADiamond,LiveCodeBench,CodeElo,CodeForces,AIME25,HLE,LiveCodeBenchv5)
+# AIME24=(AIME24)
+STANDARD_EVAL_TASKS=(ArenaHard)
+FULL_EVAL_TASKS=()
+AIME24=()
 
 if   [[ "${HASH}" == "636d" ]]; then TASKS=("${STANDARD_EVAL_TASKS[@]}")
 elif [[ "${HASH}" == "2e29" ]]; then TASKS=("${FULL_EVAL_TASKS[@]}")
@@ -43,7 +46,7 @@ TASKS_STR=$(IFS=, ; echo "${TASKS[*]}")
 # 3. LOAD MODULES & ACTIVATE ENV ──────────────────────────────────────────────
 set -e
 
-source /work/10159/rmarten/vista/dcft/dcft_private/hpc/dotenv/tacc.env
+# source /work/10159/rmarten/vista/dcft/dcft_private/hpc/dotenv/tacc.env
 $EVALCHEMY_ACTIVATE_ENV
 
 echo "┌──────────────────────────────────────────────"
