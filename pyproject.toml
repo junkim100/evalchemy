@@ -89,8 +89,6 @@ dependencies = [
     # Code Analysis & Development
     "black",
     "tree-sitter-python",
-    "tree-sitter-java",
-    "tree_sitter",
     "asttokens",
     "mypy_extensions",
     "pyext @ git+https://github.com/penfever/PyExt",
@@ -141,23 +139,6 @@ dependencies = [
     "jmespath",
     "immutabledict",
 
-    # BigCodeBench
-    "appdirs>=1.4.4",
-    "multipledispatch>=0.6.0",
-    "pqdm>=0.2.0",
-    "tempdir>=0.7.1",
-    "tree_sitter_languages>=1.10.2",
-    "wget>=3.2",
-
-    # SWE-bench
-    "swebench>=3.0.4",
-
-    # LM Eval
-    "lm-eval[vllm] @ git+https://github.com/junkim100/lm-evaluation-harness",
-
-    # TauBench
-    "tau-bench @ git+https://github.com/sierra-research/tau-bench",
-
     # BFCL
     "requests",
     "tqdm",
@@ -189,7 +170,24 @@ dependencies = [
     "rank_bm25==0.2.2",
     "google-search-results",
     "sentence-transformers>=2.7.0",
-    "networkx==3.3"
+    "networkx==3.3",
+
+    # BigCodeBench
+    "appdirs>=1.4.4",
+    "multipledispatch>=0.6.0",
+    "pqdm>=0.2.0",
+    "tempdir>=0.7.1",
+    "tree_sitter_languages>=1.10.2",
+    "wget>=3.2",
+
+    # SWE-bench
+    "swebench>=3.0.4",
+
+    # LM Eval
+    "lm-eval[vllm] @ git+https://github.com/junkim100/lm-evaluation-harness",
+
+    # TauBench
+    "tau-bench @ git+https://github.com/sierra-research/tau-bench",
 ]
 
 [project.urls]
