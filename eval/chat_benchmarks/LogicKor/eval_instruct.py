@@ -93,7 +93,7 @@ class LogicKorBenchmark(BaseBenchmark):
 
             # Apply debug mode
             if self.debug:
-                data = data[:5]
+                data = data[:10]
                 self.logger.info(f"Debug mode: using {len(data)} examples")
 
             self.logger.info(f"Loaded {len(data)} LogicKor examples")

@@ -188,6 +188,8 @@ dependencies = [
 
     # TauBench
     "tau-bench @ git+https://github.com/sierra-research/tau-bench",
+
+    
 ]
 
 [project.urls]

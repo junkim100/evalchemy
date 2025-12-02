@@ -94,8 +94,8 @@ class HLESubsetBenchmark(BaseBenchmark):
         """
         examples = self.load_questions()
         if self.debug:
-            examples = examples.select(range(2))
-            self.logger.info(f"Debug mode: using 2 examples")
+            examples = examples.select(range(10))
+            self.logger.info(f"Debug mode: using 10 examples")
 
         # Prepare instances for model
         all_outputs = []
@@ -211,8 +211,8 @@ class HLESubsetBenchmark(BaseBenchmark):
 
         dataset = self.load_questions()
         if self.debug:
-            dataset = dataset.select(range(2))
-            self.logger.info(f"Debug mode: using 2 examples")
+            dataset = dataset.select(range(10))
+            self.logger.info(f"Debug mode: using 10 examples")
 
         dataset = dataset.to_dict()
         questions = [dict(zip(dataset.keys(), values)) for values in zip(*dataset.values())]

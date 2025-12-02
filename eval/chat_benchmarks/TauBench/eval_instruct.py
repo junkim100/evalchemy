@@ -200,7 +200,7 @@ class TauBenchBenchmark(BaseBenchmark):
             "temperature": self.config.temperature,
             "task_split": self.config.task_split,
             "start_index": self.config.start_index,
-            "end_index": 2 if self.debug else self.config.end_index,  # Limit to 2 tasks in debug mode
+            "end_index": 10 if self.debug else self.config.end_index,  # Limit to 10 tasks in debug mode
             "task_ids": self.config.task_ids,
             "log_dir": None,  # Will be set to temp directory
             "max_concurrency": self.config.max_concurrency,

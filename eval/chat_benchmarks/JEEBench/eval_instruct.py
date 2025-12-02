@@ -6,8 +6,8 @@ import numpy as np
 from datasets import Dataset, load_dataset
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
-from utils import compute_score, last_boxed_only_string, remove_boxed
 
+from eval.chat_benchmarks.JEEBench.utils import compute_score, last_boxed_only_string, remove_boxed
 from eval.task import BaseBenchmark
 
 ########################################################################
@@ -81,6 +81,7 @@ class JEEBenchBenchmark(BaseBenchmark):
         max_tokens: int = 32768,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
+        n_repeat: Optional[int] = 1
     ):
         """
         Initialize JEEBench benchmark.
@@ -94,7 +95,7 @@ class JEEBenchBenchmark(BaseBenchmark):
         self.debug = debug
         self.max_new_tokens = max_tokens
         self.seed = seed
-        self.n_repeat = 3
+        self.n_repeat = n_repeat
 
         self.prompt_library = prompt_for_boxed_answer(PROMPT_LIBRARY)
 
@@ -114,8 +115,8 @@ class JEEBenchBenchmark(BaseBenchmark):
 
         examples = self.load_questions()
         if self.debug:
-            examples = examples.select(range(3))
-            self.logger.info(f"Debug mode: using 3 examples")
+            examples = examples.select(range(10))
+            self.logger.info(f"Debug mode: using 10 examples")
 
         # Prepare instances for model
         all_outputs = []

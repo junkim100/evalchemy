@@ -38,6 +38,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         max_tokens: int = 32768,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
+        n_repeat: Optional[int] = 1
     ):
         """
         Initialize GPQADiamond benchmark.
@@ -52,7 +53,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         self.debug = debug
         self.seed = seed
         self.max_new_tokens = max_tokens
-        self.n_repeat = 3
+        self.n_repeat = n_repeat
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
@@ -173,7 +174,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         dataset = load_dataset(self.dataset_name, "gpqa_diamond", cache_dir=HF_HUB_CACHE)
         questions = [row for row in dataset["train"]]
         if self.debug:
-            questions = questions[:2]
+            questions = questions[:10]
         self.logger.info(f"Loaded {len(questions)} questions from {self.dataset_name}")
         return questions
 

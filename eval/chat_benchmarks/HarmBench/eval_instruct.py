@@ -76,7 +76,6 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
         self,
         behaviors_path: str = "eval/chat_benchmarks/HarmBench/data/behavior_datasets/harmbench_behaviors_text_test.csv",
         classifier_path: str = "cais/HarmBench-Llama-2-13b-cls",
-        max_examples: Optional[int] = None,
         debug: bool = False,
         seed: List[int] = [0, 1234, 1234, 1234],
         max_tokens: int = 512,
@@ -93,7 +92,6 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
         Args:
             behaviors_path: Path to the behaviors CSV file
             classifier_path: Path or name of the HarmBench classifier model
-            max_examples: Maximum number of examples to evaluate (None for all)
             debug: If set, only evaluate on 10 examples
             seed: Random seed for reproducibility
             max_tokens: Maximum number of tokens to generate
@@ -125,7 +123,6 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
 
         self.behaviors_path = behaviors_path
         self.classifier_path = classifier_path
-        self.max_examples = max_examples
         self.debug = debug
         self.seed = seed
         self.max_new_tokens = max_tokens
@@ -212,8 +209,6 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
 
         if self.debug:
             examples = examples[:10]
-        elif self.max_examples:
-            examples = examples[:self.max_examples]
 
         self.logger.info(f"Evaluating {len(examples)} harmful behaviors")
         if self.functional_categories:

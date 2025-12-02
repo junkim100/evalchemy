@@ -57,6 +57,7 @@ class LiveCodeBenchV5OfficialBenchmark(BaseBenchmark):
         max_tokens: int = 32768,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
+        n_repeat: Optional[int] = 1
     ):
         """
         Initialize LiveCodeBenchV5 benchmark.
@@ -71,7 +72,7 @@ class LiveCodeBenchV5OfficialBenchmark(BaseBenchmark):
         self.debug = debug
         self.max_new_tokens = max_tokens
         self.seed = seed
-        self.n_repeat = 3
+        self.n_repeat = n_repeat
 
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """

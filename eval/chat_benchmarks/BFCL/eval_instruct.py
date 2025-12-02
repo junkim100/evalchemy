@@ -28,6 +28,8 @@ class BFCLBenchmark(BaseBenchmark):
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
+        *args, 
+        **kwargs
     ):
         """
         Initialize ArenaHard benchmark.
@@ -53,8 +55,6 @@ class BFCLBenchmark(BaseBenchmark):
         self.temperature = temperature
         self.do_sample = do_sample
         self.debug = debug
-
-
 
     def get_involved_test_entries(self, test_category_args, run_ids):
         test_categories, all_test_entries_involved = [], {}
@@ -82,9 +82,9 @@ class BFCLBenchmark(BaseBenchmark):
                 all_test_entries_involved,
             ) = self.get_involved_test_entries(self.test_category, False)
             if self.debug:
-                all_test_entries_involved = {k: v[:2] for k, v in all_test_entries_involved.items()}
-                self.logger.info(f"Debug mode: using 2 examples")
-            return test_categories, all_test_entries_involved         
+                all_test_entries_involved = {k: v[:10] for k, v in all_test_entries_involved.items()}
+                self.logger.info(f"Debug mode: using 10 examples")
+            return test_categories, all_test_entries_involved
         except Exception as e:
             self.logger.error(f"Error loading dataset: {str(e)}")
             raise

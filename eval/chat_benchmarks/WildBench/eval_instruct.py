@@ -120,7 +120,7 @@ class WildBenchBenchmark(BaseBenchmark):
             dataset = load_dataset("allenai/WildBench", self.config.dataset_version, split=self.config.split)
 
             if self.debug:
-                dataset = dataset.select(range(min(2, len(dataset))))
+                dataset = dataset.select(range(min(10, len(dataset))))
                 self.logger.info(f"Debug mode: using {len(dataset)} examples")
 
             # Initialize data structures

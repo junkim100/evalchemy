@@ -43,7 +43,6 @@ class WMT19Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
     def __init__(
         self,
         language_pair: str = "zh-en",
-        max_examples: Optional[int] = None,
         debug: bool = False,
         seed: List[int] = [0, 1234, 1234, 1234],
         max_tokens: int = 1024,
@@ -82,7 +81,6 @@ class WMT19Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
         super().__init__(logger=logger, system_instruction=system_instruction)
 
         self.language_pair = language_pair
-        self.max_examples = max_examples
         self.debug = debug
         self.seed = seed
         self.max_new_tokens = max_tokens
@@ -158,9 +156,7 @@ class WMT19Benchmark(BaseBenchmark if BaseBenchmark is not None else object):
 
         if self.debug:
             examples = examples[:10]
-        elif self.max_examples:
-            examples = examples[:self.max_examples]
-
+            
         self.logger.info(f"Evaluating {len(examples)} examples for {self.language_pair} translation")
 
         # Prepare instances for model
