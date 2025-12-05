@@ -62,7 +62,7 @@ class AIME25Benchmark(BaseBenchmark):
         examples = self.load_questions()
         if self.debug:
             examples = examples[:10]
-            
+        self.logger.info(f"Loaded {len(examples)} questions from {self.data_file}")
         # Prepare instances for model
         all_outputs = []
 
@@ -162,7 +162,6 @@ class AIME25Benchmark(BaseBenchmark):
         """Load AIME25 questions from the data file."""
         with open(self.data_file, "r") as f:
             questions = [json.loads(x) for x in f]
-        self.logger.info(f"Loaded {len(questions)} questions from {self.data_file}")
         return questions
 
     def extract_answer(self, output: str) -> str:
