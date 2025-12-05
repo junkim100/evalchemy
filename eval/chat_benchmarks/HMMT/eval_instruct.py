@@ -63,6 +63,10 @@ class HMMTBenchmark(BaseBenchmark):
             or None for non-primary ranks
         """
         examples = self.load_questions()
+        
+        if self.debug:
+            examples = examples[:10]
+            
         # Prepare instances for model
         all_outputs = []
 

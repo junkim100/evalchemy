@@ -92,7 +92,8 @@ class LongBenchv2Benchmark(BaseBenchmark):
                 self.logger.info(f"Filtered by length '{self.filter_length}': {len(dataset)} examples")
 
             if self.debug:
-                dataset = dataset.select(range(min(5, len(dataset))))
+                # dataset = dataset.select(range(min(5, len(dataset))))
+                dataset = dataset.select(range(10))
                 self.logger.info(f"Debug mode: using {len(dataset)} examples")
 
             self.logger.info(f"Loaded {len(dataset)} LongBench v2 examples")

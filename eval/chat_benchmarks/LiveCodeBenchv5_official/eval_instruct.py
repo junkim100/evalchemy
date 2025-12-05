@@ -57,6 +57,7 @@ class LiveCodeBenchV5OfficialBenchmark(BaseBenchmark):
         max_tokens: int = 32768,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
+        n_repeat: Optional[int] = 1
     ):
         """
         Initialize LiveCodeBenchV5 benchmark.

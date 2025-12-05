@@ -61,8 +61,8 @@ class SWEBenchBenchmark(BaseBenchmark):
         ]
 
         if self.debug:
-            instances = instances[:2]
-            self.logger.info("Debug mode: using first 2 instances only")
+            instances = instances[:10]
+            self.logger.info("Debug mode: using first 10 instances only")
 
         all_instances = []
         for idx, instance in enumerate(instances):

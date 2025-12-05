@@ -61,8 +61,8 @@ class IFEvalBenchmark(BaseBenchmark):
 
             eval_range = range(self.start_idx, min(self.end_idx, len(examples)))
             if self.debug:
-                eval_range = list(eval_range)[:2]
-                self.logger.info(f"Debug mode: using 2 examples")
+                eval_range = list(eval_range)[:10]
+                self.logger.info(f"Debug mode: using 10 examples")
 
             for i in eval_range:
                 ex = examples[i]
@@ -197,7 +197,7 @@ class IFEvalBenchmark(BaseBenchmark):
 
         try:
             generation_results = self.generate_responses(model)
-            evaluation_results = self.evaluate_responses(generaiton_results)
+            evaluation_results = self.evaluate_responses(generation_results)
 
             evaluation_results.update(
                 {"benchmark_version": "ifeval", "max_tokens": self.max_tokens, "num_shot": self.num_examples}

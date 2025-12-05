@@ -30,6 +30,7 @@ class AIME24Benchmark(BaseBenchmark):
         max_tokens: int = 32768,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
+        n_repeat: Optional[int] = 1
     ):
         """
         Initialize AIME24 benchmark.
@@ -60,6 +61,8 @@ class AIME24Benchmark(BaseBenchmark):
             or None for non-primary ranks
         """
         examples = self.load_questions()
+        if self.debug:
+            examples = examples[:10]
         # Prepare instances for model
         all_outputs = []
 

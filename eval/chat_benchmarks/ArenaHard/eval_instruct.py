@@ -90,6 +90,7 @@ class ArenaHardBenchmark(BaseBenchmark):
         """Load the evaluation dataset."""
         try:
             dataset = datasets.load_dataset(self.dataset_name, self.subsets[0], trust_remote_code=True)[self.split]
+    
             for subset in self.subsets[1:]:
                 _dataset = datasets.load_dataset(self.dataset_name, subset, trust_remote_code=True)[self.split]
                 dataset = datasets.concatenate_datasets([dataset, _dataset])
@@ -117,10 +118,10 @@ class ArenaHardBenchmark(BaseBenchmark):
             uids = sorted(uids)
             
             if self.debug:
-                questions = questions[:2]
-                baselines = baselines[:2]
-                references = references[:2]
-                self.logger.info(f"Debug mode: using 2 examples")
+                questions = questions[:10]
+                baselines = baselines[:10]
+                references = references[:10]
+                self.logger.info(f"Debug mode: using 10 examples")
 
             dataset = [{"uid": uid, "question": q, "baseline": b, "reference": r} for uid, q, b, r in zip(uids, questions, baselines, references)]
             self.logger.info(f"Loaded {len(dataset)} examples for evaluation")

@@ -26,7 +26,7 @@ class AIWBenchmark(BaseBenchmark):
         max_tokens: int = 32768,
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
-        n_trials: int = 100,  # Run 100 trials
+        n_trials: int = 1,  # Run 1 trial
     ):
         """
         Initialize AIW benchmark.
@@ -56,7 +56,9 @@ class AIWBenchmark(BaseBenchmark):
             Dictionary containing generated responses
         """
         examples = self.load_questions()
-
+        if self.debug:
+            examples = examples[:10]
+            
         # Filter examples based on the target IDs
         examples = [ex for ex in examples if ex["id"] in self.TARGET_IDS]
 
