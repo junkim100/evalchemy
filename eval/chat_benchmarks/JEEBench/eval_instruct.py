@@ -95,7 +95,7 @@ class JEEBenchBenchmark(BaseBenchmark):
         self.debug = debug
         self.max_new_tokens = max_tokens
         self.seed = seed
-        self.n_repeat = n_repeat
+        self.n_repeat = 1
 
         self.prompt_library = prompt_for_boxed_answer(PROMPT_LIBRARY)
 

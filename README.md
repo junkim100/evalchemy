@@ -29,7 +29,7 @@ We provide a pre-built Docker container with all dependencies installed:
 
 ```bash
 # Pull the Docker image
-docker pull junkim100/evalchemy:latest
+docker pull junkim100/evalchemy:wbl-latest
 
 # Run the container with GPU support
 docker run --gpus all -it --rm \

@@ -35,6 +35,7 @@ class ZeroEvalBenchmark(BaseBenchmark):
         config: Optional[ZeroEvalConfig] = None,
         max_tokens: Optional[int] = 4096,
         debug: bool = False,
+        
         logger: Optional[logging.Logger] = None,
         system_instruction: Optional[str] = None,
     ):
