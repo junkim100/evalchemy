@@ -120,48 +120,71 @@ class LogicKorBenchmark(BaseBenchmark):
         ]
         return test_data
 
+
     def generate_responses(self, model: LM) -> Dict[str, Any]:
         """
         Generate solution completions using the provided model.
-
-        Args:
-            model: Language model
-
-        Returns:
-            Dictionary containing generated responses and evaluation data,
-            or None for non-primary ranks
+        Updated to handle multi-turn conversations sequentially.
         """
-        examples = []
+        # 결과를 저장할 딕셔너리 초기화
+        processed_examples = defaultdict(
+            lambda: {"questions": [], "outputs": [], "references": [], "category": "", "id": None}
+        )
+        
+        # 각 예제별 대화 기록(History) 저장소
+        # key: example_id, value: list of message dicts
+        history_store = defaultdict(list)
 
-        # Prepare instances for model
-        all_instances = []
-        for idx, example in enumerate(self.dataset):
-            questions = example.get("questions", [])
+        # 데이터셋 내 최대 턴 수 계산 (보통 LogicKor는 2턴)
+        max_turns = 0
+        for example in self.dataset:
+            max_turns = max(max_turns, len(example.get("questions", [])))
 
-            # Process each question in the multi-turn conversation
-            for q_idx, question in enumerate(questions):
-                # Construct the prompt
-                prompt = self._construct_prompt(question, q_idx == 0)
+        self.logger.info(f"Starting generation for {len(self.dataset)} examples with max {max_turns} turns.")
 
-                messages = [
-                    {"role": "user", "content": prompt},
-                ]
+        # 턴(Turn) 단위로 순차적 처리 (Turn 0 -> Generate -> Update History -> Turn 1 ...)
+        for turn_idx in range(max_turns):
+            current_batch_instances = []
+            batch_metadata = [] # 현재 배치의 예제 ID와 메타데이터 추적용
 
-                templated_messages = self._prepare_messages(messages, model)
+            self.logger.info(f"Processing Turn {turn_idx + 1}/{max_turns}...")
 
+            for idx, example in enumerate(self.dataset):
+                questions = example.get("questions", [])
+                
+                # 현재 턴에 해당하는 질문이 없는 예제는 건너뜀
+                if turn_idx >= len(questions):
+                    continue
+
+                question = questions[turn_idx]
+                example_id = example.get("id", idx)
+                category = example.get("category", "unknown")
+                reference = (
+                    example.get("references", [None])[turn_idx]
+                    if turn_idx < len(example.get("references", []))
+                    else None
+                )
+
+                # 1. 프롬프트 구성
+                prompt = self._construct_prompt(question, turn_idx == 0)
+
+                # 2. 히스토리에 현재 사용자 질문 추가
+                # 주의: 이전 턴의 답변이 이미 history_store에 쌓여 있어야 함
+                history_store[example_id].append({"role": "user", "content": prompt})
+
+                # 3. 모델 입력을 위한 메시지 준비 (전체 히스토리 사용)
+                templated_messages = self._prepare_messages(history_store[example_id], model)
+
+                # 4. 인스턴스 생성
                 instance = Instance(
                     "generate_until",
                     {
-                        "example_id": example.get("id", idx),
-                        "question_index": q_idx,
+                        "example_id": example_id,
+                        "question_index": turn_idx,
                         "question": question,
-                        "category": example.get("category", "unknown"),
-                        "reference": (
-                            example.get("references", [None])[q_idx]
-                            if q_idx < len(example.get("references", []))
-                            else None
-                        ),
-                        "is_first_question": q_idx == 0,
+                        "category": category,
+                        "reference": reference,
+                        "is_first_question": turn_idx == 0,
                     },
                     (
                         templated_messages,
@@ -172,56 +195,60 @@ class LogicKorBenchmark(BaseBenchmark):
                             "seed": self.seed,
                         },
                     ),
-                    f"{idx}_{q_idx}",
+                    f"{example_id}_{turn_idx}",
                 )
-
-                # Add metadata for tracking
+                
+                # 메타데이터 추적 (나중에 출력을 매핑하기 위함)
                 instance.metadata = {
-                    "example_id": example.get("id", idx),
-                    "question_index": q_idx,
-                    "category": example.get("category", "unknown"),
+                    "example_id": example_id,
+                    "question_index": turn_idx,
+                    "category": category,
                 }
+                
+                current_batch_instances.append(instance)
+                batch_metadata.append(instance.metadata)
 
-                all_instances.append(instance)
+            if not current_batch_instances:
+                break
 
-        # Generate model responses
-        self.logger.info("Generating responses for LogicKor...")
-        outputs = self.compute(model, all_instances)
+            # 5. 현재 턴에 대한 일괄 생성 (Compute)
+            outputs = self.compute(model, current_batch_instances)
 
-        # Return None early for non-primary ranks
+            # 6. 생성 결과를 히스토리에 반영 및 결과 저장
+            for i, output in enumerate(outputs):
+                meta = batch_metadata[i]
+                ex_id = meta["example_id"]
+                
+                # 출력 텍스트 추출
+                if isinstance(output, str):
+                    response_text = output
+                elif hasattr(output, "outputs") and output.outputs:
+                    response_text = output.outputs[0].text
+                elif hasattr(output, "text"):
+                    response_text = output.text
+                else:
+                    response_text = str(output)
+
+                # 중요: 모델의 답변을 히스토리에 추가 (다음 턴을 위해)
+                history_store[ex_id].append({"role": "assistant", "content": response_text})
+
+                # 결과 데이터 구조에 저장
+                processed_examples[ex_id]["questions"].append(current_batch_instances[i].doc["question"])
+                processed_examples[ex_id]["outputs"].append(response_text)
+                processed_examples[ex_id]["references"].append(current_batch_instances[i].doc["reference"])
+                processed_examples[ex_id]["category"] = meta["category"]
+                processed_examples[ex_id]["id"] = ex_id
+
+        # Return None early for non-primary ranks (DDP 환경 고려)
         if model.rank != 0:
             return None
 
-        # Process outputs and prepare for evaluation
-        processed_examples = defaultdict(
-            lambda: {"questions": [], "outputs": [], "references": [], "category": "", "id": None}
-        )
-
-        for instance, output in zip(all_instances, outputs):
-            # Extract text from different output types
-            if isinstance(output, str):
-                response_text = output
-            elif hasattr(output, "outputs") and output.outputs:
-                response_text = output.outputs[0].text
-            elif hasattr(output, "text"):
-                response_text = output.text
-            else:
-                response_text = str(output)
-
-            example_id = instance.doc["example_id"]
-            question_index = instance.doc["question_index"]
-
-            # Group by example_id
-            processed_examples[example_id]["questions"].append(instance.doc["question"])
-            processed_examples[example_id]["outputs"].append(response_text)
-            processed_examples[example_id]["references"].append(instance.doc["reference"])
-            processed_examples[example_id]["category"] = instance.doc["category"]
-            processed_examples[example_id]["id"] = example_id
-
-        # Convert to list format
+        # 리스트 형태로 변환하여 반환
         examples = list(processed_examples.values())
-
         return {"examples": examples}
+
+
+
 
     def _construct_prompt(self, question: str, is_first_question: bool = True) -> str:
         """
@@ -503,3 +530,18 @@ class LogicKorBenchmark(BaseBenchmark):
                 score += 1.0
 
         return score
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
