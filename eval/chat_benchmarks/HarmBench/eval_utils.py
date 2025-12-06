@@ -1,3 +1,4 @@
+import os
 import re
 import itertools
 from ast import literal_eval
@@ -5,6 +6,9 @@ import spacy
 from datasketch import MinHash
 from tqdm import tqdm
 import copy
+
+# Get the directory where this script is located
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ============================== UTILS FOR EXPANDING EXPERIMENT TEMPLATES ============================== #
 
@@ -372,7 +376,7 @@ def compute_results_hashing(behavior_dict, data):
 
     import pickle as pkl
 
-    reference_minhashes_path = f'./data/copyright_classifier_hashes/{behavior_id}.pkl'
+    reference_minhashes_path = os.path.join(_SCRIPT_DIR, 'data', 'copyright_classifier_hashes', f'{behavior_id}.pkl')
     with open(reference_minhashes_path, 'rb') as f:
         reference_minhashes = pkl.load(f)
     

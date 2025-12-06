@@ -1,42 +1,24 @@
 import logging
-import re
+import sys
 import csv
-import json
+import torch
 import os
-from typing import Any, Dict, List, Optional, Tuple
+
+from typing import Any, Dict, List, Optional
 from collections import defaultdict
+from spacy.cli import download
+download("en_core_web_sm")
+
+import pandas as pd
+import numpy as np
+from transformers import AutoTokenizer
+from vllm import LLM, SamplingParams
+from lm_eval.api.instance import Instance
+from lm_eval.api.model import LM as EvalLM
+from eval.task import BaseBenchmark
 
 try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-try:
-    import numpy as np
-except ImportError:
-    np = None
-
-try:
-    from transformers import AutoTokenizer
-    from vllm import LLM, SamplingParams
-except ImportError:
-    AutoTokenizer = None
-    LLM = None
-    SamplingParams = None
-
-try:
-    from lm_eval.api.instance import Instance
-    from lm_eval.api.model import LM as EvalLM
-except ImportError:
-    Instance = None
-    EvalLM = None
-
-try:
-    from eval.task import BaseBenchmark
-except ImportError:
-    BaseBenchmark = None
-
-try:
+    sys.path.append('./eval/chat_benchmarks/HarmBench')
     from .eval_utils import (
         compute_results_classifier,
         compute_results_hashing,
@@ -44,23 +26,12 @@ try:
         LLAMA2_CLS_PROMPT
     )
 except ImportError:
-    # Fallback imports for when running outside the HarmBench directory
-    try:
-        import sys
-        import os
-        sys.path.append(os.path.dirname(__file__))
-        from eval_utils import (
-            compute_results_classifier,
-            compute_results_hashing,
-            compute_results_advbench,
-            LLAMA2_CLS_PROMPT
-        )
-    except ImportError:
-        compute_results_classifier = None
-        compute_results_hashing = None
-        compute_results_advbench = None
-        LLAMA2_CLS_PROMPT = None
-
+    from eval_utils import (
+        compute_results_classifier,
+        compute_results_hashing,
+        compute_results_advbench,
+        LLAMA2_CLS_PROMPT
+    )
 
 class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object):
     """
@@ -76,7 +47,6 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
         self,
         behaviors_path: str = "eval/chat_benchmarks/HarmBench/data/behavior_datasets/harmbench_behaviors_text_test.csv",
         classifier_path: str = "cais/HarmBench-Llama-2-13b-cls",
-        max_examples: Optional[int] = None,
         debug: bool = False,
         seed: List[int] = [0, 1234, 1234, 1234],
         max_tokens: int = 512,
@@ -93,7 +63,6 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
         Args:
             behaviors_path: Path to the behaviors CSV file
             classifier_path: Path or name of the HarmBench classifier model
-            max_examples: Maximum number of examples to evaluate (None for all)
             debug: If set, only evaluate on 10 examples
             seed: Random seed for reproducibility
             max_tokens: Maximum number of tokens to generate
@@ -125,7 +94,6 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
 
         self.behaviors_path = behaviors_path
         self.classifier_path = classifier_path
-        self.max_examples = max_examples
         self.debug = debug
         self.seed = seed
         self.max_new_tokens = max_tokens
@@ -167,14 +135,46 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
 
         return behaviors
 
+    def _get_available_gpu_memory_utilization(self, safety_margin: float = 0.05) -> float:
+        """
+        Calculate the maximum safe gpu_memory_utilization based on current free GPU memory.
+        
+        Args:
+            safety_margin: Extra margin to leave free (default 5%)
+            
+        Returns:
+            A value between 0.1 and 0.9 representing safe gpu_memory_utilization
+        """
+        try:
+            num_gpus = torch.cuda.device_count()
+            if num_gpus == 0:
+                return 0.4  # Default fallback
+            
+            min_free_fraction = 1.0
+            for i in range(num_gpus):
+                free_memory, total_memory = torch.cuda.mem_get_info(i)
+                free_fraction = free_memory / total_memory
+                min_free_fraction = min(min_free_fraction, free_fraction)
+            
+            # Use available memory minus safety margin, clamped to reasonable range
+            utilization = max(0.1, min(0.9, min_free_fraction - safety_margin))
+            print(f"Detected {min_free_fraction*100:.1f}% GPU memory free, using gpu_memory_utilization={utilization:.2f}")
+            return utilization
+        except Exception as e:
+            print(f"Could not determine GPU memory, using default: {e}")
+            return 0.4  # Default fallback
+
     def _get_classifier(self):
         """Lazy load the classifier model."""
         if self._classifier is None:
             try:
+                num_gpus = torch.cuda.device_count()
+                gpu_mem_util = self._get_available_gpu_memory_utilization()
+                print(f"\nLoading classifier on {num_gpus} GPUs with gpu_memory_utilization={gpu_mem_util:.2f}...")
                 self._classifier = LLM(
                     model=self.classifier_path,
-                    tensor_parallel_size=1,
-                    dtype="float16"
+                    tensor_parallel_size=num_gpus,
+                    gpu_memory_utilization=gpu_mem_util
                 )
                 self._classifier_tokenizer = AutoTokenizer.from_pretrained(self.classifier_path)
                 self.logger.info(f"Loaded classifier: {self.classifier_path}")
@@ -212,8 +212,6 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
 
         if self.debug:
             examples = examples[:10]
-        elif self.max_examples:
-            examples = examples[:self.max_examples]
 
         self.logger.info(f"Evaluating {len(examples)} harmful behaviors")
         if self.functional_categories:
@@ -299,14 +297,16 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
 
     def _extract_response(self, output: str) -> str:
         """
-        Extract the response from model output.
+        Extract the response from model output, removing thinking tokens.
 
         Args:
             output: Raw model output
 
         Returns:
-            Extracted response text
+            Extracted response text with thinking content removed
         """
+        import re
+        
         # Handle different output formats
         if isinstance(output, str):
             text = output
@@ -316,15 +316,31 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
             text = output.text
         else:
             text = str(output)
-
-        # Clean up the response - for HarmBench we want the full response
+        
+        # Remove thinking tokens and their content
+        # Patterns: <think>...</think>, <thinking>...</thinking>, <|think|>...<|/think|>, etc.
+        thinking_patterns = [
+            r'<think>.*?</think>',           # <think>...</think>
+            r'<thinking>.*?</thinking>',     # <thinking>...</thinking>
+            r'<\|think\|>.*?<\|/think\|>',   # <|think|>...<|/think|>
+            r'<\|thinking\|>.*?<\|/thinking\|>',  # <|thinking|>...<|/thinking|>,
+            r'<|begin_of_thinking|>.*?<|end_of_thinking|>',  # <|begin_of_thinking|>...<|end_of_thinking|>
+            r'<thought>.*?</thought>',  # <thought>...</thought>
+        ]
+        
+        for pattern in thinking_patterns:
+            text = re.sub(pattern, '', text, flags=re.DOTALL | re.IGNORECASE)
+        
+        # Clean up the response - remove extra whitespace
+        text = re.sub(r'\n\s*\n', '\n\n', text)  # Collapse multiple newlines
+        print(f"\nExtracted response: {text.strip()}")
         return text.strip()
 
     def _evaluate_with_classifier(self, examples: List[Dict]) -> List[Dict]:
         """Evaluate examples using the HarmBench classifier."""
         classifier, tokenizer = self._get_classifier()
-
-        if classifier is None or compute_results_classifier is None:
+        print("\nUsing classifier:", classifier)
+        if classifier is None:
             self.logger.warning("Classifier not available, skipping classifier evaluation")
             return examples
 
@@ -343,17 +359,12 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
             data = [{"generation": ex["generation"]} for ex in behavior_examples]
 
             try:
-                # Use the evaluation utility function
-                cls_params = {
-                    "model": classifier,
-                    "tokenizer": tokenizer,
-                    "sampling_params": SamplingParams(
+                cls_params = SamplingParams(
                         temperature=0.0,
                         max_tokens=10,
                         stop=["\n"]
                     )
-                }
-
+                print(f"\nEvaluating behavior {behavior_id} with classifier...")
                 results = compute_results_classifier(behavior_dict, data, classifier, cls_params)
 
                 # Merge results back
