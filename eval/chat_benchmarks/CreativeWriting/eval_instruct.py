@@ -876,7 +876,7 @@ class CreativeWritingBenchmark(BaseBenchmark):
     def __init__(
         self,
         judge_model: str = "gpt-4o-mini",
-        iterations: int = 3,
+        iterations: int = 1,
         max_tokens: int = 4000,
         temperature: float = 0.7,
         min_p: float = 0.1,
@@ -940,6 +940,11 @@ class CreativeWritingBenchmark(BaseBenchmark):
         with open(judge_prompt_file, 'r', encoding='utf-8') as f:
             self.judge_prompt_template = f.read()
 
+        if self.debug:
+            self.logger.info("Debug mode enabled: using subset of prompts")
+            # Limit to first 10 prompts for debugging
+            self.creative_prompts = dict(list(self.creative_prompts.items())[:10])
+            
     def generate_responses(self, model) -> Dict[str, Any]:
         """
         Generate creative writing responses using evalchemy's model interface.

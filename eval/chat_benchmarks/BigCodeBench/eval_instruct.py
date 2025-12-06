@@ -76,7 +76,6 @@ class BigCodeBenchBenchmark(BaseBenchmark):
         debug: bool = False,
         logger: Optional[logging.Logger] = None,
         instruction_prefix: str = None,
-        response_prefix: str = None,
         safe_mode: bool = False,
         check_ground_truth: bool = False,
         system_instruction: Optional[str] = None,
@@ -136,7 +135,7 @@ class BigCodeBenchBenchmark(BaseBenchmark):
                     examples = json.load(fr)
 
                 if self.debug:
-                    examples = examples[:2]
+                    examples = examples[:10]
                     self.logger.info(f"Debug mode enabled. Using only {len(examples)} examples.")
 
                 self.logger.info(f"Loaded {len(examples)} examples for BigCodeBench-{prompt_type}")

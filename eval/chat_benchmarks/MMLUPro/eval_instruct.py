@@ -129,7 +129,7 @@ class MMLUProBenchmark(BaseBenchmark):
 
         instances = []
         for idx, ex in enumerate(self.test_examples):
-            if self.debug and idx >= 2:
+            if self.debug and idx >= 10:
                 break
 
             # dynamically choose k so prompt fits

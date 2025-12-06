@@ -4,13 +4,15 @@ import torch
 import datasets
 from tqdm import tqdm
 import pandas as pd
-
+import sys
 from lm_eval.api.instance import Instance
 from lm_eval.api.model import LM
-from alpaca_eval.main import evaluate as alpaca_eval_evaluate
-from alpaca_eval.constants import DEFAULT_ANNOTATOR_CONFIG
-from eval.task import BaseBenchmark
 
+sys.path.append("eval/chat_benchmarks/alpaca_eval/src/alpaca_eval")
+
+import evaluate as alpaca_eval_evaluate
+from constants  import DEFAULT_ANNOTATOR_CONFIG
+from eval.task import BaseBenchmark
 
 class AlpacaBenchmark(BaseBenchmark):
     """
@@ -69,8 +71,8 @@ class AlpacaBenchmark(BaseBenchmark):
             dataset = datasets.load_dataset(self.dataset_name, self.subset, trust_remote_code=True)[self.split]
 
             if self.debug:
-                dataset = dataset.select(range(2))
-                self.logger.info(f"Debug mode: using 2 examples")
+                dataset = dataset.select(range(10))
+                self.logger.info(f"Debug mode: using 10 examples")
 
             self.logger.info(f"Loaded {len(dataset)} examples for evaluation")
             return dataset

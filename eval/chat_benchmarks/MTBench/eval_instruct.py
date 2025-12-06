@@ -189,8 +189,8 @@ class MTBenchBenchmark(BaseBenchmark):
         questions = load_questions(self.question_file, self.config.question_begin, self.config.question_end)
 
         if self.debug:
-            questions = questions[:2]
-            self.logger.info("Debug mode: using first 2 questions")
+            questions = questions[:10]
+            self.logger.info("Debug mode: using first 10 questions")
 
         # Shuffle questions for better load balancing
         random.shuffle(questions)

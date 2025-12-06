@@ -232,8 +232,8 @@ class AutoLogiBenchmark(BaseBenchmark):
                             data.append(json.loads(line.strip()))
 
                 if self.debug:
-                    data = data[:2]
-                    self.logger.info(f"Debug mode: using 2 examples")
+                    data = data[:10]
+                    self.logger.info(f"Debug mode: using 10 examples")
 
                 self.logger.info(f"Loaded {len(data)} AutoLogi examples from {dataset_path}")
                 return data

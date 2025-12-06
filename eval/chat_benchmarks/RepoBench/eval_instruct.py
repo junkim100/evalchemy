@@ -74,8 +74,8 @@ class RepoBenchmark(BaseBenchmark):
                     continue
 
                 if self.debug:
-                    dataset = dataset.select(range(2))
-                    self.logger.info(f"Debug mode: using 2 examples")
+                    dataset = dataset.select(range(10))
+                    self.logger.info(f"Debug mode: using 10 examples")
 
                 all_instances = []
                 # Split dataset across ranks for parallel construction

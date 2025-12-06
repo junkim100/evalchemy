@@ -4,7 +4,7 @@ This directory contains the integration of [TauBench](https://github.com/sierra-
 
 ## Overview
 
-TauBench (τ-bench) is a benchmark for evaluating Tool-Agent-User interaction in real-world domains. It emulates dynamic conversations between a user (simulated by language models) and a language agent provided with domain-specific API tools and policy guidelines.
+TauBench2 (τ-bench) is a benchmark for evaluating Tool-Agent-User interaction in real-world domains. It emulates dynamic conversations between a user (simulated by language models) and a language agent provided with domain-specific API tools and policy guidelines.
 
 **Paper**: [τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains](https://arxiv.org/abs/2406.12045)
 
