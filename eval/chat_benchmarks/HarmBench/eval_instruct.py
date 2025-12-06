@@ -333,7 +333,7 @@ class HarmBenchBenchmark(BaseBenchmark if BaseBenchmark is not None else object)
         
         # Clean up the response - remove extra whitespace
         text = re.sub(r'\n\s*\n', '\n\n', text)  # Collapse multiple newlines
-        print(f"\nExtracted response: {text.strip()}")
+        # print(f"\nExtracted response: {text.strip()}")
         return text.strip()
 
     def _evaluate_with_classifier(self, examples: List[Dict]) -> List[Dict]:
