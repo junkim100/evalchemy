@@ -61,7 +61,7 @@ class MATH500Benchmark(BaseBenchmark):
         examples = self.load_questions()
 
         if self.debug:
-            examples = examples[:10]
+            examples = examples[:30]
             
         # Prepare instances for model
         all_instances = []
