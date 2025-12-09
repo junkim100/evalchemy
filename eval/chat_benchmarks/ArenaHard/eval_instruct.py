@@ -118,9 +118,9 @@ class ArenaHardBenchmark(BaseBenchmark):
             uids = sorted(uids)
             
             if self.debug:
-                questions = questions[:10]
-                baselines = baselines[:10]
-                references = references[:10]
+                questions = questions[:20]
+                baselines = baselines[:20]
+                references = references[:20]
                 self.logger.info(f"Debug mode: using 10 examples")
 
             dataset = [{"uid": uid, "question": q, "baseline": b, "reference": r} for uid, q, b, r in zip(uids, questions, baselines, references)]
