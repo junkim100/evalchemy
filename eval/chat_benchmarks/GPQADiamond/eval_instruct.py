@@ -174,7 +174,7 @@ class GPQADiamondBenchmark(BaseBenchmark):
         dataset = load_dataset(self.dataset_name, "gpqa_diamond", cache_dir=HF_HUB_CACHE)
         questions = [row for row in dataset["train"]]
         if self.debug:
-            questions = questions[:10]
+            questions = questions[:30]
         self.logger.info(f"Loaded {len(questions)} questions from {self.dataset_name}")
         return questions
 

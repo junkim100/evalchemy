@@ -87,7 +87,7 @@ Please continue to complete the function. You are not allowed to modify the give
                 self.logger.info(f"Loaded {len(examples)} examples for {lang}")
 
                 if self.debug:
-                    examples = examples[:10]
+                    examples = examples[:20]
                     self.logger.info("Debug mode: using first 10 examples only")
 
                 all_instances = []

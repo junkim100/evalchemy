@@ -81,7 +81,7 @@ class CodeEloBenchmark(BaseBenchmark):
         """
         examples = self.load_questions()
         if self.debug:
-            examples = examples[:10]
+            examples = examples[:20]
 
         # TODO - figure out how to support these?
         if self.filter_interaction_questions:
