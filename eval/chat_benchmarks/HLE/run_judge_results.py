@@ -18,24 +18,43 @@ from tqdm.asyncio import tqdm_asyncio
 
 client = AsyncOpenAI(timeout=300.0, max_retries=1)
 
-JUDGE_PROMPT = """Judge whether the following [response] to [question] is correct or not based on the precise and unambiguous [correct_answer] below.
+# JUDGE_PROMPT = """Judge whether the following [response] to [question] is correct or not based on the precise and unambiguous [correct_answer] below.
+
+# [question]: {question}
+
+# [response]: {response}
+
+# Your judgement must be in the format and criteria specified below:
+
+# extracted_final_answer: The final exact answer extracted from the [response]. Put the extracted answer as 'None' if there is no exact, final answer to extract from the response.
+
+# [correct_answer]: {correct_answer}
+
+# reasoning: Explain why the extracted_final_answer is correct or incorrect based on [correct_answer], focusing only on if there are meaningful differences between [correct_answer] and the extracted_final_answer. Do not comment on any background to the problem, do not attempt to solve the problem, do not argue for any answer different than [correct_answer], focus only on whether the answers match.
+
+# correct: Answer 'yes' if extracted_final_answer matches the [correct_answer] given above, or is within a small margin of error for numerical problems. Answer 'no' otherwise, i.e. if there if there is any inconsistency, ambiguity, non-equivalency, or if the extracted answer is incorrect.
+
+
+# confidence: The extracted confidence score between 0|\%| and 100|\%| from [response]. Put 100 if there is no confidence score available."""
+
+JUDGE_PROMPT = """아래의 [question]에 대한 [response]가 아래의 명확하고 모호함이 없는 [correct_answer]에 근거하여 올바른지 판단하세요.
 
 [question]: {question}
 
 [response]: {response}
 
-Your judgement must be in the format and criteria specified below:
+아래에 명시된 형식과 기준에 따라 판단 결과를 작성해야 합니다:
 
-extracted_final_answer: The final exact answer extracted from the [response]. Put the extracted answer as 'None' if there is no exact, final answer to extract from the response.
+extracted_final_answer: [response]에서 추출한 최종 정확한 답변입니다. 만약 추출할 수 있는 최종 답변이 없다면 'None'으로 작성하세요.
 
 [correct_answer]: {correct_answer}
 
-reasoning: Explain why the extracted_final_answer is correct or incorrect based on [correct_answer], focusing only on if there are meaningful differences between [correct_answer] and the extracted_final_answer. Do not comment on any background to the problem, do not attempt to solve the problem, do not argue for any answer different than [correct_answer], focus only on whether the answers match.
+reasoning: extracted_final_answer가 [correct_answer]를 기준으로 올바른지 또는 올바르지 않은지 설명하세요. 두 답변 사이에 의미 있는 차이가 있는지에만 집중하세요. 문제의 배경설명은 하지 말고, 문제를 새로 풀려 하지 말고, [correct_answer]와 다른 답을 주장하지 마세요. 오로지 두 답이 일치하는지 여부만 평가하세요.
 
-correct: Answer 'yes' if extracted_final_answer matches the [correct_answer] given above, or is within a small margin of error for numerical problems. Answer 'no' otherwise, i.e. if there if there is any inconsistency, ambiguity, non-equivalency, or if the extracted answer is incorrect.
+correct: extracted_final_answer가 위의 [correct_answer]와 일치하거나, 수치 문제의 경우 아주 작은 오차 범위 내에 있으면 'yes'로 답하세요. 그렇지 않고 불일치, 모호함, 비동등, 오답 등 어떤 경우에도 'no'로 답하세요.
 
-
-confidence: The extracted confidence score between 0|\%| and 100|\%| from [response]. Put 100 if there is no confidence score available."""
+confidence: [response]에서 추출한 신뢰도 점수(0|\%| ~ 100|\%|)를 작성하세요. 신뢰도 점수가 따로 없으면 100을 입력하세요.
+"""
 
 
 class ExtractedAnswer(BaseModel):

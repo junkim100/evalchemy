@@ -18,3 +18,4 @@ def get_multiple_choice_answer(pred: str):
 
     # Final fallback: return the whole trimmed string
     return pred.strip().rstrip(".").rstrip("/")
+

@@ -73,8 +73,8 @@ dependencies = [
     "reka-api",
     "together",
     "dashscope",
-    "fschat @ file:eval/chat_benchmarks/MTBench",  # Use relative path that pip will resolve during installation
-
+    "fschat", 
+    
     # Cloud & Storage
     "gcsfs",
     "google-cloud-aiplatform",
@@ -189,7 +189,8 @@ dependencies = [
     "lm-eval[vllm] @ git+https://github.com/junkim100/lm-evaluation-harness",
 
     # TauBench
-    "tau-bench @ git+https://github.com/sierra-research/tau-bench",
+    "deepdiff",
+    "gymnasium"
 
     
 ]
