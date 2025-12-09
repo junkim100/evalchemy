@@ -135,7 +135,7 @@ class BigCodeBenchBenchmark(BaseBenchmark):
                     examples = json.load(fr)
 
                 if self.debug:
-                    examples = examples[:10]
+                    examples = examples[:20]
                     self.logger.info(f"Debug mode enabled. Using only {len(examples)} examples.")
 
                 self.logger.info(f"Loaded {len(examples)} examples for BigCodeBench-{prompt_type}")
