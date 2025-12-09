@@ -80,7 +80,7 @@ class LiveCodeBenchV5Benchmark(BaseBenchmark):
         """
         examples = self.load_questions()
         if self.debug:
-            examples = examples.select(range(10))
+            examples = examples.select(range(20))
 
         all_outputs = []
 
