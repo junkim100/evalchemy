@@ -147,7 +147,7 @@ class ArenaHardBenchmark(BaseBenchmark):
             all_instances = []
             for idx, example in enumerate(eval_set):
                 try:
-                    question = example["question"]
+                    question = example["question"]['prompt']
                     formatted_instruction = self._prepare_messages([{"role": "user", "content": question}], model)
 
                     all_instances.append(
