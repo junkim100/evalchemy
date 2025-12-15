@@ -21,13 +21,16 @@ if not HF_HUB_CACHE:
         "WARNING: HF_HUB_CACHE environment variable is not set, using default cache directory ~/.cache/huggingface/hub for LiveCodeBenchv5 benchmark"
     )
 
-
 def has_code(response):
+    # [수정됨] 유니코드 언더바(U+2581) 등을 공백으로 치환
+    if response:
+        response = response.replace("\u2581", " ")
+    
     pattern = r"```(?:[a-zA-Z]*)\n(.*?)```"
     # Use re.DOTALL to match multiline content inside backticks
     matches = re.findall(pattern, response, re.DOTALL)
     return matches
-
+    
 
 # Calculate mean and standard error for all metrics
 def calc_stats(values):
